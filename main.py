@@ -2,7 +2,6 @@ import os
 import logging
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
-from dotenv import load_dotenv
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, InputFile
 from telegram.ext import (
@@ -20,8 +19,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-load_dotenv()
-
+# Убираем load_dotenv() и берем переменные напрямую
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 TIMEZONE = os.getenv("TIMEZONE", "Europe/Samara")
 PRICE_FILE_PATH = os.getenv("PRICE_FILE_PATH", "files/price.pdf")
@@ -30,7 +28,7 @@ PRICE_URL = os.getenv("PRICE_URL")
 CONTRACT_URL = os.getenv("CONTRACT_URL")
 
 if not BOT_TOKEN:
-    raise RuntimeError("Не задан BOT_TOKEN в .env")
+    raise RuntimeError("Не задан BOT_TOKEN в переменных окружения")
 
 tz = ZoneInfo(TIMEZONE)
 
@@ -68,7 +66,7 @@ ASK_DATETIME, ASK_NOTE, ASK_REVIEW_TEXT = range(3)
 def main_menu_keyboard():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("📄 Прайс", callback_data="show_price"),
-         InlineKeyboardButton("�� Договор", callback_data="show_contract")],
+         InlineKeyboardButton(" Договор", callback_data="show_contract")],
         [InlineKeyboardButton("📞 Наши контакты", callback_data="show_contacts")],
         [InlineKeyboardButton("⏰ Установить напоминание", callback_data="set_reminder")],
         [InlineKeyboardButton("💬 Отзывы", callback_data="reviews")],
@@ -81,11 +79,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "🛠️ Добро пожаловать в сервис аренды инструмента!\n\n"
         "Здесь вы можете:\n"
-        "• �� Посмотреть прайс\n"
+        "• Посмотреть прайс\n"
         "• 📝 Ознакомиться с договором\n"
-        "• �� Связаться с нами\n"
+        "• Связаться с нами\n"
         "• ⏰ Установить напоминание о возврате\n"
-        "• �� Читать и оставлять отзывы\n\n"
+        "• Читать и оставлять отзывы\n\n"
         "Выберите нужное действие:"
     )
     if update.message:
@@ -137,7 +135,7 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif data == "show_contract":
         await q.answer()
-        await send_document_by_path_or_url(update, context, CONTRACT_FILE_PATH, CONTRACT_URL, "�� Договор аренды:")
+        await send_document_by_path_or_url(update, context, CONTRACT_FILE_PATH, CONTRACT_URL, " Договор аренды:")
 
     elif data == "show_contacts":
         await q.answer()
@@ -147,15 +145,15 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         address_url = "https://maps.google.com/?q=г.Маркс, ул. 2-я Сосновая, д. 12"
 
         contacts_text = (
-            "�� Наши контакты:\n\n"
+            " Наши контакты:\n\n"
             f"📱 Телефон: [{phone_number}](tel:{phone_number})\n"
             f"📧 WhatsApp: [Написать в WhatsApp](https://wa.me/79536353102)\n\n"
             "🕒 Время работы:\n"
-            "Пн-Пт: 8:00 - 18:00\n"
-            "Сб: 9:00 - 16:00\n"
+            "Пн-Пт: 9:00 - 18:00\n"
+            "Сб: 10:00 - 16:00\n"
             "Вс: выходной\n\n"
             f"📍 Адрес: [{address}]({address_url})\n\n"
-            "�� Как добраться: нажмите на адрес для открытия в навигаторе"
+            " Как добраться: нажмите на адрес для открытия в навигаторе"
         )
         await q.message.reply_text(
             contacts_text,
@@ -298,7 +296,7 @@ async def show_reviews(update: Update, context: ContextTypes.DEFAULT_TYPE, limit
 
     if not items:
         await update.effective_message.reply_text(
-            "�� Пока нет отзывов.\n\n"
+            " Пока нет отзывов.\n\n"
             "Нажмите «✍️ Оставить отзыв», чтобы написать первый!",
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✍️ Оставить отзыв", callback_data="review_add")]])
         )
@@ -309,7 +307,7 @@ async def show_reviews(update: Update, context: ContextTypes.DEFAULT_TYPE, limit
         name = r.user_name or "Без имени"
         dt_local = r.created_at.astimezone(tz)
         lines.append(f"💬 {r.text}\n  👤 {name}, {dt_local.strftime('%d.%m.%Y %H:%M')}")
-    text = "�� Последние отзывы:\n\n" + "\n\n".join(lines)
+    text = " Последние отзывы:\n\n" + "\n\n".join(lines)
 
     await update.effective_message.reply_text(
         text,
@@ -356,7 +354,7 @@ async def ask_review_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ---------- Команды ----------
 async def cmd_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await send_document_by_path_or_url(update, context, PRICE_FILE_PATH, PRICE_URL, "�� Актуальный прайс:")
+    await send_document_by_path_or_url(update, context, PRICE_FILE_PATH, PRICE_URL, " Актуальный прайс:")
 
 
 async def cmd_contract(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -369,15 +367,15 @@ async def cmd_contacts(update: Update, context: ContextTypes.DEFAULT_TYPE):
     address_url = "https://maps.google.com/?q=г.Маркс, ул. 2-я Сосновая, д. 12"
 
     contacts_text = (
-        "�� Наши контакты:\n\n"
+        " Наши контакты:\n\n"
         f"📱 Телефон: [{phone_number}](tel:{phone_number})\n"
         f"📧 WhatsApp: [Написать в WhatsApp](https://wa.me/79536353102)\n\n"
         "🕒 Время работы:\n"
-        "Пн-Пт: 8:00 - 18:00\n"
-        "Сб: 9:00 - 16:00\n"
+        "Пн-Пт: 9:00 - 18:00\n"
+        "Сб: 10:00 - 16:00\n"
         "Вс: выходной\n\n"
         f"📍 Адрес: [{address}]({address_url})\n\n"
-        "�� Как добраться: нажмите на адрес для открытия в навигаторе"
+        " Как добраться: нажмите на адрес для открытия в навигаторе"
     )
     await update.message.reply_text(
         contacts_text,
