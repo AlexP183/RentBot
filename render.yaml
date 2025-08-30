@@ -9,7 +9,3 @@ services:
         sync: false
       - key: TIMEZONE
         value: Europe/Samara
-      - key: PRICE_FILE_PATH
-        value: files/price.pdf
-      - key: CONTRACT_FILE_PATH
-        value: files/contract.pdf
